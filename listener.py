@@ -1,17 +1,31 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int16
+from person_msgs.srv import Query
 
-rclpy.init()
-node = Node("listener")
+class QueryClient(Node):
+    def __init__(self):
+        super().__init__('query_client')
+        self.client = self.create_client(Query, 'query')
 
+    def send_request(self, name):
+        request = Query.Request()
+        request.name = name
+        future = self.client.call_async(request)
+        future.add_done_callback(self.callback)
 
-def cb(msg):
-    global node
-    node.get_logger().info("Listen: %d" % msg.data)
-
+    def callback(self, future):
+        response = future.result()
+        self.get_logger().info(f"Received response: {response.age}")
 
 def main():
-    pub = node.create_subscription(Int16, "countup", cb, 10)
-    rclpy.spin(node)
+    rclpy.init()
+    client = QueryClient()
+
+    # "上田隆一"という名前を送信
+    client.send_request('上田隆一')
+
+    rclpy.spin(client)  # ノードをスピンして応答を待機
+
+if __name__ == '__main__':
+    main()
 
