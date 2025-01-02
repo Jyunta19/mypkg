@@ -13,7 +13,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name), glob('launch/*.launch.py'))],
+        (os.path.join('share', package_name), glob('launch/*.launch.py'))
+    ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Jyunta Suzuki',
@@ -21,7 +22,7 @@ setup(
     description='a package for practice',
     license='BSD-3-Clause',
     tests_require=['pytest'],
-    entry_points={  # ここにエントリーポイントを追加
+    entry_points={
         'console_scripts': [
             'talker = mypkg.talker:main',
             'listener = mypkg.listener:main',
