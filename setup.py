@@ -8,7 +8,7 @@ setup(
     name=package_name,
     version='0.0.0',
     packages=[package_name],
-    py_modules=['mypkg.talker'],
+    py_modules=['mypkg.network_monitor'],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -24,8 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'talker = mypkg.talker:main',
-            'listener = mypkg.listener:main',
+            'network_monitor = mypkg.network_monitor:main',
         ],
     },
 )
