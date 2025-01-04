@@ -39,3 +39,4 @@ jobs:
         source /opt/ros/humble/setup.bash
         colcon test --packages-select my_package
         colcon test-result --verbose
+
