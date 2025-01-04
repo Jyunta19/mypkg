@@ -1,15 +1,39 @@
-name: test
-on: push
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
-  test:
-    runs-on: ubuntu-20.04
-    container: ryuichiueda/ubuntu22.04-ros2:latest
+  build-and-test:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: build and test
-        run: |
-          rsync -av ./ /root/ros2_ws/src/mypkg/
-          cd /root/ros2_ws
-          rosdep update
-          rosdep install -i --from-path src --rosdistro humble -y
-          bash -xv ./src/mypkg/test/test.bash /root 
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip python3-colcon-common-extensions ros-$ROS_DISTRO-desktop
+        sudo rosdep init
+        rosdep update
+
+    - name: Setup ROS 2 workspace
+      run: |
+        mkdir -p ~/ros2_ws/src
+        rsync -av ./ ~/ros2_ws/src/mypkg/
+        cd ~/ros2_ws
+        rosdep install --from-paths src --ignore-src -r -y
+        colcon build
+
+    - name: Source ROS 2
+      run: echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> $GITHUB_ENV
+
+    - name: Run tests
+      run: |
+        source /opt/ros/$ROS_DISTRO/setup.bash
+        source ~/ros2_ws/install/setup.bash
+        bash ~/ros2_ws/src/mypkg/test/test.bash
