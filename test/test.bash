@@ -1,52 +1,25 @@
 #!/bin/bash
-# SPDX-FileCopyrightText: 2024 Jyunta Suzuki 　　　　　
+# SPDX-FileCopyrightText: 2024 Jyunta Suzuki 　　　　　 
 # SPDX-License-Identifier: BSD-3-Clause
 
-# 必要なパッケージがインストールされているか確認
-echo "Checking if required packages are installed..."
-pip show psutil > /dev/null 2>&1
+# ROS 2 のワークスペースを設定
+dir=~
+[ "$1" != "" ] && dir="$1"  # 引数でディレクトリを指定可能
 
-if [ $? -ne 0 ]; then
-    echo "psutil is not installed. Installing..."
-    pip install psutil
-fi
+cd $dir/ros2_ws
+colcon build
+source /opt/ros/foxy/setup.bash || { echo "Error: /opt/ros/humble/setup.bash not found"; exit 1; }
+source $dir/ros2_ws/install/setup.bash || { echo "Error: ~/ros2_ws/install/setup.bash not found"; exit 1; }
 
-# ROS 2 workspaceのビルド
-echo "Building ROS 2 workspace..."
-cd ~/ros2_ws
-colcon build --symlink-install
+# ノードを起動し、ログファイルにリダイレクト
+timeout 10 ros2 run mypkg date_countdown > /tmp/mypkg.log 2>&1 &
 
-# ROS 2 workspaceのセットアップ
-source ~/ros2_ws/install/setup.bash
-
-# NetworkMonitorノードをバックグラウンドで起動
-echo "Starting the NetworkMonitor node..."
-ros2 run mypkg network_monitor &
-
-# 少し待機してノードが起動するのを待つ
+# ログファイルの出力内容を確認
+echo "=== トピックの内容確認 ==="
 sleep 2
 
-# トピックが公開されているか確認
-echo "Checking if 'network_usage' topic is being published..."
-ros2 topic list | grep "network_usage"
+cat /tmp/mypkg.log | grep '年明けまであと' || { echo "エラー: トピックに期待したメッセージが送信されていません"; exit 1; }
 
-if [ $? -ne 0 ]; then
-    echo "Error: 'network_usage' topic is not found."
-    exit 1
-fi
+# テスト成功
+echo "=== テスト成功 ==="
 
-# サブスクライブして出力を確認（1回のみ取得）
-echo "Subscribing to 'network_usage' topic and getting output once..."
-ros2 topic echo /network_usage --once > result.log
-
-# 少し待機して出力を取得
-sleep 1
-
-# 実行中のros2プロセスをすべて停止
-echo "Stopping all ros2 processes..."
-pkill -f ros2
-
-# 終了メッセージ
-echo "Test completed. Script has completely finished."
-
-exit 0
