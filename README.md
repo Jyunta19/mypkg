@@ -22,7 +22,7 @@ colcon build
 
 3. コマンドを実行します。
 ```
-ros2 run mypkg network_monitor
+ros2 run mypkg date_countdown
 ```
 
 4. 別のターミナルでメッセージの確認
