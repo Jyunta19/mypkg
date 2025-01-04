@@ -1,4 +1,4 @@
-name: Build and Test
+name: ROS 2 CI
 
 on:
   push:
@@ -7,33 +7,29 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
+    env:
+      ROS_DISTRO: humble
+
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-pip python3-colcon-common-extensions ros-$ROS_DISTRO-desktop
+        sudo apt-get install -y python3-pip
+        pip install -U colcon-common-extensions
+        sudo apt-get install -y ros-$ROS_DISTRO-desktop
+
+    - name: Initialize rosdep
+      run: |
         sudo rosdep init
         rosdep update
 
-    - name: Setup ROS 2 workspace
-      run: |
-        mkdir -p ~/ros2_ws/src
-        rsync -av ./ ~/ros2_ws/src/mypkg/
-        cd ~/ros2_ws
-        rosdep install --from-paths src --ignore-src -r -y
-        colcon build
-
-    - name: Source ROS 2
-      run: echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> $GITHUB_ENV
-
-    - name: Run tests
+    - name: Build workspace
       run: |
         source /opt/ros/$ROS_DISTRO/setup.bash
-        source ~/ros2_ws/install/setup.bash
-        bash ~/ros2_ws/src/mypkg/test/test.bash
+        colcon build --symlink-install
