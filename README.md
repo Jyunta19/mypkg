@@ -32,7 +32,7 @@ ros2 run mypkg network_monitor
 
 ## 動作環境
 - Ubuntu 20.04 LTS
-- ROS2 Humble
+- ROS 2 バージョン: foxy
 
 ## ライセンス
 - このソフトウェアパッケージは、3条項BSDライセンスの下、再頒布および使用が許可されます。
