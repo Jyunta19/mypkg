@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-FileCopyrightText: 2024 Jyunta Suzuki 　　　　　 
+# SPDX-FileCopyrightText: 2024 Jyunta Suzuki
 # SPDX-License-Identifier: BSD-3-Clause
 
 # ROS 2 のワークスペースを設定
@@ -8,7 +8,18 @@ dir=~
 
 cd $dir/ros2_ws
 colcon build
-source /opt/ros/foxy/setup.bash || { echo "Error: /opt/ros/humble/setup.bash not found"; exit 1; }
+
+# ROS 2 のセットアップファイルを動的に選択
+if [ -f /opt/ros/humble/setup.bash ]; then
+    source /opt/ros/humble/setup.bash
+elif [ -f /opt/ros/foxy/setup.bash ]; then
+    source /opt/ros/foxy/setup.bash
+else
+    echo "Error: No ROS 2 setup file found"
+    exit 1
+fi
+
+# ワークスペースのセットアップ
 source $dir/ros2_ws/install/setup.bash || { echo "Error: ~/ros2_ws/install/setup.bash not found"; exit 1; }
 
 # ノードを起動し、ログファイルにリダイレクト
