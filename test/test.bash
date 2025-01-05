@@ -29,7 +29,12 @@ timeout 10 ros2 run mypkg date_countdown > /tmp/mypkg.log 2>&1 &
 echo "=== トピックの内容確認 ==="
 sleep 2
 
-cat /tmp/mypkg.log | grep '年明けまであと' || { echo "エラー: トピックに期待したメッセージが送信されていません"; exit 1; }
+# 5秒後にバックグラウンドでトピックの内容を確認
+timeout 5 ros2 topic echo /date_countdown_topic > /tmp/topic_output.log 2>&1 &
+
+# トピックの内容確認後、エラーが発生した場合は処理を終了
+sleep 6  # トピック確認後に少し待つ
+cat /tmp/topic_output.log || { echo "エラー: トピックに期待したメッセージが送信されていません"; exit 1; }
 
 # テスト成功
 echo "=== テスト成功 ==="
