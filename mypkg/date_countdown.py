@@ -19,7 +19,6 @@ class DateCountdownNode(Node):
         msg = String()
         msg.data = f"今日の日付: {self.current_date.strftime('%Y-%m-%d')}, 年明けまであと {remaining_days} 日"
         self.publisher.publish(msg)
-        self.get_logger().info(f"{msg.data}")
         self.current_date += timedelta(days=1)
 
 def main():
